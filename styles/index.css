@@ -1,0 +1,300 @@
+/* ============================================
+   DESIGN SYSTEM — Aphasia Recovery Practice App
+   ============================================
+   Modeled on Tactus Therapy clinical aesthetics:
+   - High-contrast, clean light palette
+   - 4 typography levels
+   - Compact spacing & flat design
+   - Square / barely rounded corners (2px-4px)
+   - Zero heavy elevation / shadows
+   ============================================ */
+
+/* ---------- CSS Custom Properties ---------- */
+:root {
+    /* Reference Colors (Tactus-inspired) */
+    --color-primary: #012E4D;      /* primary controls, headings, core UI */
+    --color-background: #EEEDF2;   /* main background/surface */
+    --color-card: #9EA9AF;         /* cards/list surfaces */
+    --color-card-light: #AFB8BD;   /* lighter card/border state */
+    --color-accent-orange: #FE5E01; /* highlight/emphasis, use sparingly */
+    --color-accent-gold: #FAAE33;   /* secondary highlight */
+    --color-white: #FFFFFF;
+    --color-text: #012E4D;          /* near-navy, not pure black */
+
+    /* Semantic Mappings */
+    --bg-primary: var(--color-background);
+    --bg-surface: var(--color-white);
+    --bg-elevated: var(--color-card-light);
+    --bg-hover: var(--color-card-light);
+    --bg-overlay: rgba(1, 46, 77, 0.4);
+
+    --text-primary: var(--color-text);
+    --text-secondary: rgba(1, 46, 77, 0.72);
+    --text-tertiary: rgba(1, 46, 77, 0.52);
+    --text-inverse: var(--color-white);
+
+    /* Accents */
+    --accent-blue: var(--color-primary);
+    --accent-blue-hover: #023D66;
+    --accent-blue-soft: var(--color-card-light);
+    --accent-blue-glow: rgba(1, 46, 77, 0.08);
+
+    --accent-green: #237844;
+    --accent-green-hover: #1b6137;
+    --accent-green-glow: rgba(35, 120, 68, 0.1);
+
+    --accent-amber: var(--color-accent-gold);
+    --accent-amber-hover: #e09825;
+    --accent-amber-glow: rgba(250, 174, 51, 0.15);
+
+    --accent-rose: #C0392B;
+    --accent-rose-hover: #a53125;
+    --accent-rose-glow: rgba(192, 57, 43, 0.1);
+
+    --accent-purple: var(--color-primary);
+    --accent-purple-glow: rgba(1, 46, 77, 0.08);
+
+    /* Borders (Flat thin borders instead of shadows) */
+    --border-subtle: 1px solid var(--color-card-light);
+    --border-default: 1px solid var(--color-card);
+    --border-focus: 2px solid var(--color-primary);
+
+    /* 4-Level Typography System */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    
+    --fs-prompt: 2.25rem;   /* Level 1: Large exercise prompt (36px) */
+    --fs-title: 1.5rem;      /* Level 2: Medium screen title (24px) */
+    --fs-body: 1.0625rem;    /* Level 3: Body / list text (17px) */
+    --fs-caption: 0.875rem;  /* Level 4: Small caption / support text (14px) */
+
+    /* Backwards compatibility aliases */
+    --fs-xs: 0.75rem;
+    --fs-sm: var(--fs-caption);
+    --fs-base: var(--fs-body);
+    --fs-lg: 1.25rem;
+    --fs-xl: var(--fs-title);
+    --fs-2xl: var(--fs-prompt);
+    --fs-3xl: 2.75rem;
+
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --lh-tight: 1.2;
+    --lh-normal: 1.45;
+    --lh-relaxed: 1.6;
+
+    /* Compact Spacing */
+    --sp-1: 0.25rem;   /* 4px */
+    --sp-2: 0.5rem;    /* 8px */
+    --sp-3: 0.75rem;   /* 12px */
+    --sp-4: 1rem;      /* 16px */
+    --sp-5: 1.25rem;   /* 20px */
+    --sp-6: 1.5rem;    /* 24px */
+    --sp-8: 2rem;      /* 32px */
+    --sp-10: 2.5rem;   /* 40px */
+    --sp-12: 3rem;     /* 48px */
+    --sp-16: 4rem;     /* 64px */
+
+    /* Corners (Square or barely rounded, 2px - 4px) */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 4px;
+    --radius-xl: 4px;
+    --radius-full: 4px; /* No pill shapes */
+
+    /* Flat design: No shadows / heavy elevation */
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-glow-blue: none;
+    --shadow-glow-green: none;
+    --shadow-glow-amber: none;
+
+    /* Transitions: Restrained 100-150ms */
+    --ease-fast: 100ms ease;
+    --ease-normal: 150ms ease;
+    --ease-slow: 200ms ease;
+    --ease-spring: 150ms ease;
+
+    /* Layout */
+    --container-max: 600px;
+    --container-wide: 760px;
+    --touch-min: 48px;
+    --nav-height: 56px;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-normal);
+    line-height: var(--lh-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+ul, ol { list-style: none; }
+a { color: var(--color-primary); text-decoration: none; }
+
+/* ---------- Typography (4 levels only) ---------- */
+h1, h2, h3, h4 {
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    color: var(--color-primary);
+}
+
+h1 { font-size: var(--fs-title); }
+h2 { font-size: var(--fs-body); font-weight: var(--fw-bold); }
+h3 { font-size: var(--fs-body); font-weight: var(--fw-semibold); }
+h4 { font-size: var(--fs-caption); font-weight: var(--fw-semibold); }
+
+p {
+    color: var(--text-secondary);
+    line-height: var(--lh-normal);
+}
+
+/* ---------- Accessibility ---------- */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb {
+    background: var(--color-card);
+    border-radius: var(--radius-sm);
+}
+
+::selection {
+    background: var(--color-card-light);
+    color: var(--color-primary);
+}
+
+/* ---------- Layout ---------- */
+.container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--sp-4);
+}
+
+.container--wide {
+    max-width: var(--container-wide);
+}
+
+/* ---------- Screen Wrapper ---------- */
+.screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-4) 0;
+    animation: fadeIn var(--ease-fast) both;
+}
+
+.screen--center {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ---------- Utility Classes ---------- */
+.text-center    { text-align: center; }
+.text-secondary { color: var(--text-secondary); }
+.text-xs        { font-size: var(--fs-xs); }
+.text-sm        { font-size: var(--fs-caption); }
+.text-lg        { font-size: var(--fs-lg); }
+.text-xl        { font-size: var(--fs-title); }
+.text-2xl       { font-size: var(--fs-prompt); }
+
+.fw-medium      { font-weight: var(--fw-medium); }
+.fw-semibold    { font-weight: var(--fw-semibold); }
+.fw-bold        { font-weight: var(--fw-bold); }
+
+.mt-1  { margin-top: var(--sp-1); }
+.mt-2  { margin-top: var(--sp-2); }
+.mt-3  { margin-top: var(--sp-3); }
+.mt-4  { margin-top: var(--sp-4); }
+.mt-6  { margin-top: var(--sp-6); }
+.mt-8  { margin-top: var(--sp-8); }
+.mb-1  { margin-bottom: var(--sp-1); }
+.mb-2  { margin-bottom: var(--sp-2); }
+.mb-3  { margin-bottom: var(--sp-3); }
+.mb-4  { margin-bottom: var(--sp-4); }
+.mb-6  { margin-bottom: var(--sp-6); }
+.my-4  { margin-top: var(--sp-4); margin-bottom: var(--sp-4); }
+
+.gap-1 { gap: var(--sp-1); }
+.gap-2 { gap: var(--sp-2); }
+.gap-3 { gap: var(--sp-3); }
+.gap-4 { gap: var(--sp-4); }
+.gap-6 { gap: var(--sp-6); }
+
+.flex-col     { display: flex; flex-direction: column; }
+.flex-row     { display: flex; flex-direction: row; }
+.flex-center  { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+.flex-wrap    { flex-wrap: wrap; }
+.flex-1       { flex: 1; }
+
+.w-full { width: 100%; }
+.hidden { display: none !important; }
