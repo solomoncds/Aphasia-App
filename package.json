@@ -1,5 +1,12 @@
 {
-  "dependencies": {
+  "name": "speech-practice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static app ready'"
+  },
+  "devDependencies": {
     "sharp": "^0.35.4"
   }
 }
+
