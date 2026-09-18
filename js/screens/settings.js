@@ -106,6 +106,46 @@ export async function render(container) {
     );
     container.appendChild(lenSection);
 
+    /* ── App & Offline Access ─────────────────────────── */
+    const appSection = section('App & Offline Practice');
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true
+        || localStorage.getItem('pwa-installed') === 'true';
+
+    if (isInstalled) {
+        appSection.appendChild(createElement('div', {
+            className: 'text-sm text-secondary',
+            style: { padding: 'var(--sp-2) 0' }
+        }, '✅ App is installed on this device with full offline support.'));
+    } else {
+        const installBtn = createElement('button', {
+            className: 'btn btn--secondary w-full',
+            onClick: async () => {
+                if (window.deferredInstallPrompt) {
+                    window.deferredInstallPrompt.prompt();
+                    const { outcome } = await window.deferredInstallPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        localStorage.setItem('pwa-installed', 'true');
+                        location.reload();
+                    }
+                    window.deferredInstallPrompt = null;
+                } else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    alert('To install on iPhone/iPad: Tap the Share button (⎋) in Safari and select "Add to Home Screen".');
+                } else {
+                    alert('To install, tap your browser menu (⋮) and select "Install app" or "Add to Home screen".');
+                }
+            }
+        }, '📲  Install App to Home Screen');
+
+        appSection.append(
+            createElement('div', {
+                className: 'text-sm text-secondary mb-3'
+            }, 'Install as a standalone app for fast, distraction-free offline access.'),
+            installBtn
+        );
+    }
+    container.appendChild(appSection);
+
     /* ── Backup ───────────────────────────────────────── */
     const backupSection = section('Backup & Restore');
 

@@ -106,6 +106,120 @@ function createNavBar(activeRoute) {
 }
 
 /* ================================================================
+   PWA INSTALLATION
+   ================================================================ */
+
+window.deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredInstallPrompt = e;
+    window.dispatchEvent(new CustomEvent('pwa-installable'));
+});
+
+window.addEventListener('appinstalled', () => {
+    window.deferredInstallPrompt = null;
+    localStorage.setItem('pwa-installed', 'true');
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) banner.remove();
+});
+
+export function isPWAInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true
+        || localStorage.getItem('pwa-installed') === 'true';
+}
+
+export function isPWADismissed() {
+    return sessionStorage.getItem('pwa-install-dismissed') === 'true';
+}
+
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function createInstallBanner() {
+    if (isPWAInstalled() || isPWADismissed()) return null;
+
+    const banner = createElement('div', {
+        className: 'install-banner',
+        id: 'pwa-install-banner',
+        role: 'region',
+        'aria-label': 'Install app notice',
+    });
+
+    const icon = createElement('div', { className: 'install-banner__icon', 'aria-hidden': 'true' }, '📲');
+
+    if (isIOS()) {
+        const body = createElement('div', { className: 'install-banner__body' }, [
+            createElement('div', { className: 'install-banner__title' }, 'Install Speech Practice'),
+            createElement('div', { className: 'install-banner__desc' }, 'Tap Share (⎋) below then "Add to Home Screen" ➕ for full offline access.'),
+        ]);
+
+        const closeBtn = createElement('button', {
+            className: 'install-banner__close',
+            'aria-label': 'Dismiss install notice',
+            onClick: () => {
+                sessionStorage.setItem('pwa-install-dismissed', 'true');
+                banner.remove();
+            },
+        }, '✕');
+
+        banner.append(icon, body, closeBtn);
+        return banner;
+    }
+
+    const body = createElement('div', { className: 'install-banner__body' }, [
+        createElement('div', { className: 'install-banner__title' }, 'Install Speech Practice'),
+        createElement('div', { className: 'install-banner__desc' }, 'Add to home screen for faster, one-tap offline practice.'),
+    ]);
+
+    const installBtn = createElement('button', {
+        className: 'btn btn--primary install-banner__btn',
+        id: 'pwa-install-action-btn',
+        onClick: async () => {
+            if (window.deferredInstallPrompt) {
+                window.deferredInstallPrompt.prompt();
+                const { outcome } = await window.deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    localStorage.setItem('pwa-installed', 'true');
+                }
+                window.deferredInstallPrompt = null;
+                banner.remove();
+            } else {
+                alert('To install, tap your browser menu (⋮) and select "Install app" or "Add to Home screen".');
+            }
+        },
+    }, 'Install App');
+
+    const closeBtn = createElement('button', {
+        className: 'install-banner__close',
+        'aria-label': 'Dismiss install notice',
+        onClick: () => {
+            sessionStorage.setItem('pwa-install-dismissed', 'true');
+            banner.remove();
+        },
+    }, '✕');
+
+    const actions = createElement('div', { className: 'install-banner__actions' }, [installBtn, closeBtn]);
+    banner.append(icon, body, actions);
+    return banner;
+}
+
+// Dynamically display banner if beforeinstallprompt fires after Home is already rendered
+window.addEventListener('pwa-installable', () => {
+    if (getRoute() === '' || getRoute() === 'home') {
+        if (!document.getElementById('pwa-install-banner') && !isPWAInstalled() && !isPWADismissed()) {
+            const banner = createInstallBanner();
+            if (banner) {
+                const homeEl = document.querySelector('.screen');
+                if (homeEl) homeEl.prepend(banner);
+            }
+        }
+    }
+});
+
+/* ================================================================
    HOME SCREEN
    ================================================================ */
 
@@ -123,6 +237,12 @@ async function renderHome(container) {
     const mastered   = nonNumbers.filter(w => w.status === 'independent').length;
     const improving  = nonNumbers.filter(w => w.status === 'cue' || w.status === 'model').length;
     const toPractice = nonNumbers.length - mastered - improving;
+
+    /* ── Install Banner ───────────────────────────────── */
+    const installBanner = createInstallBanner();
+    if (installBanner) {
+        container.appendChild(installBanner);
+    }
 
     /* ── Greeting ─────────────────────────────────────── */
     const greetingEl = createElement('h1', { className: 'home__greeting' }, `${greeting} 👋`);
