@@ -125,6 +125,26 @@
     --nav-height: 56px;
 }
 
+/* ---------- Mobile Spacing & Touch Overrides ---------- */
+@media (max-width: 600px) {
+    :root {
+        /* Relaxed spacing for mobile: generous padding and margins to eliminate cramped desktop density */
+        --sp-1: 0.375rem;  /* 6px (was 4px) */
+        --sp-2: 0.625rem;  /* 10px (was 8px) */
+        --sp-3: 0.875rem;  /* 14px (was 12px) */
+        --sp-4: 1.125rem;  /* 18px (was 16px) */
+        --sp-5: 1.375rem;  /* 22px (was 20px) */
+        --sp-6: 1.75rem;   /* 28px (was 24px) */
+        --sp-8: 2.25rem;   /* 36px (was 32px) */
+        --sp-10: 2.75rem;  /* 44px (was 40px) */
+        --sp-12: 3.5rem;   /* 56px (was 48px) */
+        --sp-16: 4.5rem;   /* 72px (was 64px) */
+
+        --touch-min: 48px;
+        --nav-height: 64px;
+    }
+}
+
 /* ---------- Reset ---------- */
 *,
 *::before,

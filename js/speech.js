@@ -2,7 +2,7 @@
  * Web Speech API — Text-to-Speech Wrapper
  *
  * Uses SpeechSynthesisUtterance (built-in, free, offline).
- * Default rate 0.8 for clear pronunciation modeling.
+ * Default rate 0.6 for clear pronunciation modeling.
  * No cloud TTS service — everything runs on-device.
  */
 
@@ -50,6 +50,25 @@ export function setVoice(voiceURI) {
  */
 export function getSelectedVoiceURI() {
     return selectedVoice ? selectedVoice.voiceURI : null;
+}
+
+let currentRate = 0.6;
+
+/**
+ * Set the global speech rate (default 0.6).
+ * @param {number} rate
+ */
+export function setRate(rate) {
+    if (typeof rate === 'number' && rate > 0) {
+        currentRate = rate;
+    }
+}
+
+/**
+ * Get the current global speech rate.
+ */
+export function getRate() {
+    return currentRate;
 }
 
 let currentAudio = null;
@@ -112,7 +131,7 @@ async function findPreRenderedAudio(text) {
 /**
  * Play a static audio file with plain Audio element.
  */
-function playAudioFile(url) {
+function playAudioFile(url, rate = currentRate) {
     return new Promise((resolve, reject) => {
         if (currentAudio) {
             currentAudio.pause();
@@ -121,6 +140,7 @@ function playAudioFile(url) {
         }
 
         const audio = new Audio(url);
+        audio.playbackRate = rate;
         currentAudio = audio;
 
         audio.onended = () => {
@@ -153,17 +173,17 @@ function playAudioFile(url) {
  * Speak text aloud.
  * Plays static pre-rendered YarnGPT2 audio first; falls back to live TTS.
  * @param {string} text   — The text to speak
- * @param {number} [rate] — Speech rate (0.1 – 2.0, default 0.8)
+ * @param {number} [rate] — Speech rate (0.1 – 2.0, default 0.6)
  * @returns {Promise<void>} — Resolves when audio/speech ends
  */
-export async function speak(text, rate = 0.8) {
+export async function speak(text, rate = currentRate) {
     stopSpeaking();
 
     // 1. Pre-rendered YarnGPT2 audio
     const preRenderedUrl = await findPreRenderedAudio(text);
     if (preRenderedUrl) {
         try {
-            await playAudioFile(preRenderedUrl);
+            await playAudioFile(preRenderedUrl, rate);
             return;
         } catch (e) {
             // Fall back to TTS on failure
@@ -201,11 +221,11 @@ export async function speak(text, rate = 0.8) {
 
 /**
  * Speak text directly via SpeechSynthesisUtterance (no audio file lookup).
- * Used for hints and prompt cues to play immediately at specified rate (default 0.8).
+ * Used for hints and prompt cues to play immediately at specified rate (default 0.6).
  * @param {string} text
- * @param {number} [rate=0.8]
+ * @param {number} [rate]
  */
-export function speakHint(text, rate = 0.8) {
+export function speakHint(text, rate = currentRate) {
     stopSpeaking();
     if (!isSpeechSupported() || !text) return;
 

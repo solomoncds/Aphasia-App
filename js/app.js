@@ -6,7 +6,7 @@
  */
 
 import { openDB, seedIfNeeded, getAll, getSettings }  from './db.js';
-import { setVoice, getAvailableVoices }                from './speech.js';
+import { setVoice, getAvailableVoices, setRate }       from './speech.js';
 import { createElement, render as renderInto,
          getGreeting, getTodayKey, formatTime }         from './utils.js';
 
@@ -227,6 +227,9 @@ async function init() {
         await seedIfNeeded();
 
         const settings = await getSettings();
+        if (settings?.speechRate) {
+            setRate(settings.speechRate);
+        }
         if (settings?.voiceURI) {
             await getAvailableVoices();
             setVoice(settings.voiceURI);

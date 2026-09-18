@@ -3,7 +3,7 @@
  *
  * Modeled on Tactus Therapy's Apraxia Therapy:
  *   1. Word shown large on screen.
- *   2. 🔊 Listen — TTS at rate 0.8.
+ *   2. 🔊 Listen — TTS at rate 0.6.
  *   3. 🎤 Your turn — user attempts aloud.
  *   4. Listen again / Try again — unlimited, no timer.
  *   5. Self-report (✓ / ↻ / →).

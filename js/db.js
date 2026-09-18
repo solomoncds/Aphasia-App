@@ -157,7 +157,7 @@ export async function seedIfNeeded() {
     await put('settings', {
         key: 'main',
         voiceURI: null,
-        speechRate: 0.8,
+        speechRate: 0.6,
         sessionLengthMinutes: 30
     });
 

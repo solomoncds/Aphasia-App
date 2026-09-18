@@ -7,7 +7,7 @@
 
 import { getSettings, updateSetting, exportAllData, importAllData,
          clearStore, openDB, seedIfNeeded }          from '../db.js';
-import { getAvailableVoices, setVoice, speak }       from '../speech.js';
+import { getAvailableVoices, setVoice, setRate, speak } from '../speech.js';
 import { createElement }                              from '../utils.js';
 
 export async function render(container) {
@@ -54,17 +54,19 @@ export async function render(container) {
     const rateSection = section('Speech Rate');
 
     const rateValue = createElement('span', { className: 'fw-semibold' },
-        String(settings.speechRate || 0.8));
+        String(settings.speechRate || 0.6));
 
     const rateSlider = createElement('input', {
         type: 'range', className: 'form-range', min: '0.4', max: '1.0', step: '0.1',
-        value: String(settings.speechRate || 0.8),
+        value: String(settings.speechRate || 0.6),
     });
     rateSlider.addEventListener('input', () => {
         rateValue.textContent = rateSlider.value;
     });
     rateSlider.addEventListener('change', async () => {
-        await updateSetting('speechRate', parseFloat(rateSlider.value));
+        const val = parseFloat(rateSlider.value);
+        await updateSetting('speechRate', val);
+        setRate(val);
     });
 
     rateSection.append(
