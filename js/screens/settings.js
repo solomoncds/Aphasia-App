@@ -9,6 +9,8 @@ import { getSettings, updateSetting, exportAllData, importAllData,
          clearStore, openDB, seedIfNeeded }          from '../db.js';
 import { getAvailableVoices, setVoice, setRate, speak } from '../speech.js';
 import { createElement }                              from '../utils.js';
+import { STARTER_NOUNS }                              from '../data/nouns.js';
+import { STARTER_VERBS }                              from '../data/verbs.js';
 
 export async function render(container) {
     container.innerHTML = '';
@@ -144,6 +146,73 @@ export async function render(container) {
             installBtn
         );
     }
+
+    /* ── Offline Media Storage ── */
+    const mediaRow = createElement('div', {
+        style: { marginTop: 'var(--sp-4)', paddingTop: 'var(--sp-3)', borderTop: '1px solid var(--border-subtle)' }
+    });
+    const mediaStatus = createElement('div', { className: 'text-sm text-secondary mb-2' }, 'Checking offline media...');
+    const downloadMediaBtn = createElement('button', {
+        className: 'btn btn--ghost btn--sm w-full',
+        style: { border: '1px solid var(--border-subtle)' }
+    }, '🔄 Verify / Re-download All Images');
+
+    mediaRow.append(mediaStatus, downloadMediaBtn);
+    appSection.appendChild(mediaRow);
+
+    async function updateMediaCount() {
+        if (!('caches' in window)) {
+            mediaStatus.textContent = 'Offline caching not supported in this browser.';
+            downloadMediaBtn.style.display = 'none';
+            return;
+        }
+        try {
+            const cacheNames = await caches.keys();
+            const activeCacheName = cacheNames.find(n => n.startsWith('speech-practice-'));
+            if (!activeCacheName) {
+                mediaStatus.textContent = 'Service Worker cache is not active yet.';
+                return;
+            }
+            const cache = await caches.open(activeCacheName);
+            const requests = await cache.keys();
+            const imageRequests = requests.filter(r => r.url.includes('/assets/images/'));
+            mediaStatus.textContent = `🖼️ ${imageRequests.length} practice images stored locally for offline use.`;
+        } catch (e) {
+            mediaStatus.textContent = 'Could not read offline image status.';
+        }
+    }
+    updateMediaCount();
+
+    downloadMediaBtn.addEventListener('click', async () => {
+        downloadMediaBtn.disabled = true;
+        mediaStatus.textContent = 'Starting download...';
+        try {
+            const cacheNames = await caches.keys();
+            const activeName = cacheNames.find(n => n.startsWith('speech-practice-')) || 'speech-practice-v9';
+            const cache = await caches.open(activeName);
+            const urls = [
+                '/icons/icon-192.png',
+                '/icons/icon-512.png',
+                ...STARTER_NOUNS.map(n => `/assets/images/nouns/${n.text.toLowerCase().trim()}.png`),
+                ...STARTER_VERBS.map(v => `/assets/images/verbs/${v.text.toLowerCase().trim()}.png`),
+            ];
+            let completed = 0;
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) await cache.put(url, res);
+                } catch (err) {}
+                completed++;
+                mediaStatus.textContent = `Downloading images... (${completed}/${urls.length})`;
+            }
+            mediaStatus.textContent = `✅ Complete! ${urls.length} images stored locally for offline use.`;
+        } catch (e) {
+            mediaStatus.textContent = 'Failed to download images: ' + e.message;
+        } finally {
+            downloadMediaBtn.disabled = false;
+        }
+    });
+
     container.appendChild(appSection);
 
     /* ── Backup ───────────────────────────────────────── */
