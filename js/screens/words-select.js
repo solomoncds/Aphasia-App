@@ -13,7 +13,7 @@ import { createElement } from '../utils.js';
 
 export async function render(container) {
     container.innerHTML = '';
-    container.className = 'screen';
+    container.className = 'screen container';
 
     const allWords = await getAll('words');
     const nouns = allWords.filter(w => w.category === 'noun');

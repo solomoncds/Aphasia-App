@@ -116,6 +116,8 @@ body {
     flex-direction: column;
     min-height: calc(100vh - var(--nav-height));
     min-height: calc(100dvh - var(--nav-height));
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .exercise-screen__top-bar {
@@ -156,7 +158,8 @@ body {
 /* ===== COMMUNICATION BOARD ===== */
 
 .comm-board {
-    padding: var(--sp-6) 0;
+    padding-top: var(--sp-6);
+    padding-bottom: var(--sp-6);
 }
 
 .comm-board__title {
@@ -355,7 +358,8 @@ body {
 /* ===== CONVERSATION SCREEN ===== */
 
 .conversation {
-    padding: var(--sp-8) 0;
+    padding-top: var(--sp-8);
+    padding-bottom: var(--sp-8);
 }
 
 .conversation__prompt {
