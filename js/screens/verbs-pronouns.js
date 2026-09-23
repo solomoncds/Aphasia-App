@@ -56,6 +56,11 @@ export async function render(container) {
             onClick: () => { window.location.hash = 'home'; },
         }, '← Exit'),
         createElement('span', { className: 'exercise-screen__counter', id: 'vp-counter' }),
+        createElement('button', {
+            className: 'exercise-screen__next',
+            id: 'vp-top-next',
+            onClick: () => goNext('skipped'),
+        }, 'Next →'),
     ]);
 
     const progressBar = createElement('div', { className: 'exercise-screen__progress' }, [
@@ -104,13 +109,21 @@ export async function render(container) {
                 style: { width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' },
             }));
         } else {
+            const verbKey = verb.toLowerCase().trim();
             const verbImg = createElement('img', {
-                src: `assets/images/verbs/${verb.toLowerCase().trim()}.png`,
+                src: `assets/images/verbs/${verbKey}.png`,
                 alt: verb,
                 className: 'photo-preview mb-3',
                 style: { maxWidth: '180px', maxHeight: '180px' },
             });
-            verbImg.onerror = () => verbImg.remove();
+            verbImg.onerror = () => {
+                // Try SVG fallback before giving up
+                if (verbImg.src.endsWith('.png')) {
+                    verbImg.src = `assets/images/verbs/${verbKey}.svg`;
+                } else {
+                    verbImg.remove();
+                }
+            };
             body.appendChild(verbImg);
         }
 
@@ -192,7 +205,13 @@ export async function render(container) {
             group.appendChild(btn);
         }
 
-        ft.append(label, group);
+        const skipBtn = createElement('button', {
+            className: 'btn btn--ghost w-full mt-3',
+            style: { color: 'var(--text-secondary)' },
+            onClick: () => goNext('skipped'),
+        }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
+
+        ft.append(label, group, skipBtn);
     }
 
     async function handleStepReport(report) {
@@ -232,7 +251,7 @@ export async function render(container) {
         ft.appendChild(nextBtn);
     }
 
-    function goNext(report) {
+    function goNext(report = 'skipped') {
         stopSpeaking();
 
         if (inSession) {

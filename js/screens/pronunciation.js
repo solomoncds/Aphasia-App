@@ -49,6 +49,11 @@ export async function render(container) {
             onClick: () => { window.location.hash = 'home'; },
         }, '← Exit'),
         createElement('span', { className: 'exercise-screen__counter', id: 'pn-counter' }),
+        createElement('button', {
+            className: 'exercise-screen__next',
+            id: 'pronun-top-next',
+            onClick: () => goNext('skipped'),
+        }, 'Next →'),
     ]);
 
     const progressBar = createElement('div', { className: 'exercise-screen__progress' }, [
@@ -178,7 +183,13 @@ export async function render(container) {
             group.appendChild(btn);
         }
 
-        footer.append(label, group);
+        const skipBtn = createElement('button', {
+            className: 'btn btn--ghost w-full mt-3',
+            style: { color: 'var(--text-secondary)' },
+            onClick: () => goNext('skipped'),
+        }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
+
+        footer.append(label, group, skipBtn);
     }
 
     async function handleReport(report) {
@@ -208,7 +219,7 @@ export async function render(container) {
         footer.appendChild(nextBtn);
     }
 
-    function goNext(report) {
+    function goNext(report = 'skipped') {
         stopSpeaking();
 
         if (inSession) {

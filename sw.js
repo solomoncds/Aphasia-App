@@ -7,7 +7,7 @@
  * Cache invalidation: bump CACHE_VERSION when files change.
  */
 
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v14';
 const CACHE_NAME = `speech-practice-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -36,6 +36,7 @@ const APP_SHELL = [
     '/js/screens/sequences.js',
     '/js/screens/pronunciation.js',
     '/js/screens/sentence-builder.js',
+    '/js/screens/pronoun-nouns.js',
     '/js/screens/verbs-pronouns.js',
     '/js/screens/conversation.js',
     '/js/screens/session-complete.js',

@@ -7,24 +7,45 @@
  *   - No self-report grading.
  *   - Audio modeling with speak() button that shifts to muted card state during playback.
  *   - Previous / Next progression with step counter (e.g. "3 / 7").
+ *
+ * Session mode: when launched inside a session, iterates through the session
+ * segment items (each item is a SEQUENCE_SET). Finishing a set calls
+ * advanceExercise() to move to the next session segment.
  */
 
 import { SEQUENCE_SETS } from '../data/sequences.js';
 import { speak, stopSpeaking } from '../speech.js';
 import { createElement } from '../utils.js';
+import { isSessionActive, getSession, advanceExercise } from '../session.js';
+
+const MY_TYPE = 'sequences';
 
 let activeSetId = null;
-let currentIdx = 0;
-let isSpeaking = false;
+let currentIdx  = 0;
+let isSpeaking  = false;
 
 export async function render(container) {
     container.innerHTML = '';
     container.className = 'screen exercise-screen';
 
-    if (!activeSetId) {
-        renderMenu(container);
+    const inSession = isSessionActive();
+
+    if (inSession) {
+        // Session mode: get the current set from the session queue
+        const seg = getSession().queue[getSession().currentSegment];
+        if (!seg || seg.type !== MY_TYPE) { window.location.hash = 'home'; return; }
+
+        const setItem = seg.items[getSession().currentItem];
+        activeSetId   = setItem.id;
+        currentIdx    = 0;
+        renderExercise(container, inSession);
     } else {
-        renderExercise(container);
+        // Standalone mode: show the set-selection menu first
+        if (!activeSetId) {
+            renderMenu(container);
+        } else {
+            renderExercise(container, false);
+        }
     }
 
     return () => {
@@ -33,7 +54,7 @@ export async function render(container) {
     };
 }
 
-/* ── Menu: Choose Sequence ──────────────────────────────── */
+/* ── Menu: Choose Sequence (standalone only) ──────────────── */
 
 function renderMenu(container) {
     container.innerHTML = '';
@@ -60,8 +81,8 @@ function renderMenu(container) {
             tabIndex: 0,
             onClick: () => {
                 activeSetId = seq.id;
-                currentIdx = 0;
-                renderExercise(container);
+                currentIdx  = 0;
+                renderExercise(container, false);
             },
         }, [
             createElement('div', {
@@ -81,12 +102,51 @@ function renderMenu(container) {
 
 /* ── Practice: Step-by-Step Traversal ───────────────────── */
 
-function renderExercise(container) {
+function renderExercise(container, inSession) {
     container.innerHTML = '';
 
     const seq = SEQUENCE_SETS.find(s => s.id === activeSetId) || SEQUENCE_SETS[0];
     const items = seq.items;
     const currentItem = items[currentIdx];
+
+    // Determine session position for the progress bar label
+    let segmentLabel = 'Sequences';
+    if (inSession) {
+        const sess = getSession();
+        segmentLabel = `Set ${sess.currentItem + 1} of ${sess.queue[sess.currentSegment].items.length}`;
+    }
+
+    const isLast = currentIdx === items.length - 1;
+
+    function handleNext() {
+        stopSpeaking();
+
+        if (!isLast) {
+            currentIdx++;
+            renderExercise(container, inSession);
+            return;
+        }
+
+        // Finished this set — advance session or return to menu
+        if (inSession) {
+            const next = advanceExercise({ type: MY_TYPE, report: 'independent' });
+            if (!next) {
+                window.location.hash = 'session-complete';
+            } else if (next.type !== MY_TYPE) {
+                window.location.hash = next.type;
+            } else {
+                // Another sequences set in the segment — load it
+                const sess = getSession();
+                const nextSetItem = sess.queue[sess.currentSegment].items[sess.currentItem];
+                activeSetId = nextSetItem.id;
+                currentIdx  = 0;
+                renderExercise(container, true);
+            }
+        } else {
+            activeSetId = null;
+            renderMenu(container);
+        }
+    }
 
     // Top Bar
     const topBar = createElement('div', { className: 'exercise-screen__top-bar' }, [
@@ -94,13 +154,22 @@ function renderExercise(container) {
             className: 'exercise-screen__back',
             onClick: () => {
                 stopSpeaking();
-                activeSetId = null;
-                renderMenu(container);
+                if (inSession) {
+                    window.location.hash = 'home';
+                } else {
+                    activeSetId = null;
+                    renderMenu(container);
+                }
             },
-        }, '← Sequences'),
+        }, inSession ? '← Exit' : '← Sequences'),
         createElement('span', { className: 'exercise-screen__counter', id: 'seq-counter' },
             `${currentIdx + 1} / ${items.length}`
         ),
+        createElement('button', {
+            className: 'exercise-screen__next',
+            id: 'seq-top-next',
+            onClick: handleNext,
+        }, isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →'),
     ]);
 
     // Progress Bar
@@ -188,25 +257,15 @@ function renderExercise(container) {
             if (currentIdx > 0) {
                 stopSpeaking();
                 currentIdx--;
-                renderExercise(container);
+                renderExercise(container, inSession);
             }
         },
     }, '← Previous');
 
-    const isLast = currentIdx === items.length - 1;
     const nextBtn = createElement('button', {
         className: 'btn btn--primary flex-1',
-        onClick: () => {
-            stopSpeaking();
-            if (isLast) {
-                activeSetId = null;
-                renderMenu(container);
-            } else {
-                currentIdx++;
-                renderExercise(container);
-            }
-        },
-    }, isLast ? 'Finish ✓' : 'Next →');
+        onClick: handleNext,
+    }, isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →');
 
     footer.append(prevBtn, nextBtn);
 

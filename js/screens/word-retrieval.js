@@ -105,6 +105,11 @@ export async function render(container) {
             onClick: () => { window.location.hash = backRoute; },
         }, inSession ? '← Exit' : '← Words'),
         createElement('span', { className: 'exercise-screen__counter', id: 'wr-counter' }),
+        createElement('button', {
+            className: 'exercise-screen__next',
+            id: 'wr-top-next',
+            onClick: () => goNext('skipped'),
+        }, 'Next →'),
     ]);
 
     const progressBar = createElement('div', { className: 'exercise-screen__progress' }, [
@@ -289,7 +294,13 @@ export async function render(container) {
             group.appendChild(btn);
         }
 
-        footer.append(label, group);
+        const skipBtn = createElement('button', {
+            className: 'btn btn--ghost w-full mt-3',
+            style: { color: 'var(--text-secondary)' },
+            onClick: () => goNext('skipped'),
+        }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
+
+        footer.append(label, group, skipBtn);
     }
 
     /* ── Handle Report ───────────────────────────────── */
@@ -332,7 +343,7 @@ export async function render(container) {
     }
 
     /* ── Next / Finish ───────────────────────────────── */
-    function goNext(report) {
+    function goNext(report = 'skipped') {
         stopSpeaking();
         isSpeaking = false;
 

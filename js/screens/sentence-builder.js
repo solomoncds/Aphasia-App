@@ -50,6 +50,11 @@ export async function render(container) {
             onClick: () => { window.location.hash = 'home'; },
         }, '← Exit'),
         createElement('span', { className: 'exercise-screen__counter', id: 'sb-counter' }),
+        createElement('button', {
+            className: 'exercise-screen__next',
+            id: 'sb-top-next',
+            onClick: () => goNext('skipped'),
+        }, 'Next →'),
     ]);
 
     const progressBar = createElement('div', { className: 'exercise-screen__progress' }, [
@@ -58,7 +63,17 @@ export async function render(container) {
         ]),
     ]);
 
-    const body   = createElement('div', { className: 'exercise__body', id: 'sb-body', style: { justifyContent: 'flex-start', paddingTop: 'var(--sp-6)' } });
+    const body   = createElement('div', {
+        className: 'exercise__body',
+        id: 'sb-body',
+        style: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            paddingTop: 'var(--sp-4)',
+            paddingBottom: 'var(--sp-4)',
+        },
+    });
     const footer = createElement('div', { className: 'exercise__footer container', id: 'sb-footer' });
 
     container.className = 'screen exercise-screen';
@@ -74,8 +89,19 @@ export async function render(container) {
         const target = sentence.words;  // correct order, e.g. ['I', 'eat', 'food.']
 
         // Tracks: bank = available cards, workspace = placed cards
-        // Each card is { word, origIdx }
-        let bank      = target.map((w, i) => ({ word: w, origIdx: i }));
+        // Each card is { word, origIdx, isImage, imageSrc, punct }
+        let bank = target.map((w, i) => {
+            const cleanWord = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const cleanImageWord = sentence._imageWord ? sentence._imageWord.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+            const isImage = Boolean(cleanImageWord && cleanWord === cleanImageWord && sentence._imageSrc);
+            return {
+                word: w,
+                origIdx: i,
+                isImage,
+                imageSrc: sentence._imageSrc,
+                punct: w.replace(/[a-zA-Z0-9\s]/g, ''),
+            };
+        });
         bank          = shuffleArray(bank);
         let workspace = [];
         let solved    = false;
@@ -88,19 +114,44 @@ export async function render(container) {
         body.innerHTML = '';
 
         // Level badge
-        body.appendChild(createElement('div', { className: 'badge badge--blue mb-4' },
+        body.appendChild(createElement('div', { className: 'badge badge--blue mb-2' },
             `Level ${sentence.level} · ${sentence.structure}`));
 
-        // Instruction
-        body.appendChild(createElement('p', { className: 'exercise__prompt mb-4' },
-            'Tap the words in the right order to build the sentence.'));
+        // In visual sentence mode, display the noun picture prominently
+        if (sentence._imageSrc) {
+            const nounImg = createElement('img', {
+                src: sentence._imageSrc,
+                alt: sentence._imageWord || 'Noun picture',
+                className: 'photo-preview mb-2',
+                style: { maxHeight: '120px', maxWidth: '150px', objectFit: 'contain' },
+            });
+            nounImg.onerror = () => {
+                nounImg.replaceWith(createElement('div', {
+                    className: 'photo-placeholder photo-placeholder--sm mb-2',
+                }, '🖼️'));
+            };
+            body.appendChild(nounImg);
+        }
+
+        // 🎯 THE SENTENCE — Centered, large, prominent: First thing that catches the eye!
+        const sentenceEl = createElement('h2', {
+            className: 'sentence-builder__target',
+            id: 'sb-target-sentence',
+        }, sentence.text);
+        body.appendChild(sentenceEl);
 
         // 🔊 Hear button
         const hearBtn = createElement('button', {
-            className: 'btn btn--ghost mb-4',
+            className: 'btn btn--ghost mb-2',
             onClick: () => speak(sentence.text),
         }, '🔊  Hear the sentence');
         body.appendChild(hearBtn);
+
+        // Instruction: positioned underneath, clearly visible but does NOT dominate
+        const promptText = sentence._imageWord
+            ? 'Tap the words and picture below to build this sentence.'
+            : 'Tap the words below to build this sentence.';
+        body.appendChild(createElement('p', { className: 'sentence-builder__instruction' }, promptText));
 
         // Workspace
         const wsEl = createElement('div', {
@@ -116,14 +167,48 @@ export async function render(container) {
 
         // Encouragement
         body.appendChild(createElement('div', {
-            id: 'sb-encouragement', className: 'exercise__encouragement mt-4',
+            id: 'sb-encouragement', className: 'exercise__encouragement mt-2',
         }));
 
         renderCards();
 
-        // Footer: empty until solved
+        // Footer: Next / Skip button while building
         const ft = document.getElementById('sb-footer');
         ft.innerHTML = '';
+        const skipBtn = createElement('button', {
+            className: 'btn btn--ghost w-full',
+            style: { color: 'var(--text-secondary)' },
+            onClick: () => goNext('skipped'),
+        }, currentIdx < items.length - 1 ? 'Next Sentence →' : 'Finish ✓');
+        ft.appendChild(skipBtn);
+
+        /* ── Helper: Card button children ────────────── */
+        function getCardChildren(card) {
+            if (card.isImage && card.imageSrc) {
+                const imgEl = createElement('img', {
+                    src: card.imageSrc,
+                    alt: card.word,
+                    className: 'word-card__img',
+                    style: {
+                        width: '36px',
+                        height: '36px',
+                        objectFit: 'contain',
+                        verticalAlign: 'middle',
+                        pointerEvents: 'none',
+                    },
+                });
+                imgEl.onerror = () => {
+                    imgEl.replaceWith(document.createTextNode('🖼️'));
+                };
+                if (card.punct) {
+                    return [imgEl, createElement('span', {
+                        style: { marginLeft: '4px', fontSize: '1.25rem', fontWeight: 'bold' }
+                    }, card.punct)];
+                }
+                return [imgEl];
+            }
+            return [card.word];
+        }
 
         /* ── Render cards ────────────────────────────── */
         function renderCards() {
@@ -151,7 +236,7 @@ export async function render(container) {
                         bank.push(card);
                         renderCards();
                     },
-                }, card.word);
+                }, getCardChildren(card));
                 wsEl.appendChild(el);
             }
 
@@ -168,7 +253,7 @@ export async function render(container) {
                         renderCards();
                         checkSolution();
                     },
-                }, card.word);
+                }, getCardChildren(card));
                 bankEl.appendChild(el);
             }
 
@@ -206,11 +291,11 @@ export async function render(container) {
     }
 
     /* ── Next / Finish ───────────────────────────────── */
-    function goNext() {
+    function goNext(report = 'independent') {
         stopSpeaking();
 
         if (inSession) {
-            const next = advanceExercise({ type: MY_TYPE, report: 'independent' });
+            const next = advanceExercise({ type: MY_TYPE, report });
             if (!next) { finish(); return; }
             if (next.type !== MY_TYPE) { window.location.hash = next.type; return; }
             currentIdx = getSession().currentItem;

@@ -360,23 +360,26 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--sp-3) var(--sp-5);
-    min-height: var(--touch-min);
-    background: var(--bg-elevated);
+    padding: var(--sp-3) var(--sp-6);
+    min-height: 52px;
+    background: var(--bg-surface);
     border: 2px solid var(--border-default);
     border-radius: var(--radius-md);
-    font-size: var(--fs-lg);
+    font-size: 1.35rem;
     font-weight: var(--fw-semibold);
+    color: var(--color-primary);
     cursor: pointer;
     transition: all var(--ease-fast);
     user-select: none;
+    box-shadow: 0 1px 3px rgba(1, 46, 77, 0.06);
 }
 .word-card:hover {
-    border-color: var(--accent-blue);
+    border-color: var(--color-primary);
     background: var(--bg-hover);
+    transform: translateY(-1px);
 }
 .word-card:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
 }
 .word-card--placed {
     background: var(--accent-blue-glow);
@@ -390,6 +393,13 @@
 }
 .word-card--disabled {
     opacity: 0.3;
+    pointer-events: none;
+}
+.word-card__img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
     pointer-events: none;
 }
 

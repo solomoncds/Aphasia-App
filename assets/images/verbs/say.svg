@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  <rect width="320" height="320" fill="white"/>
+  
+      <!-- Person saying something -->
+      <circle cx="140" cy="110" r="30" fill="#FFB74D"/>
+      <line x1="140" y1="140" x2="140" y2="220" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="220" x2="110" y2="280" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="220" x2="170" y2="280" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="170" x2="100" y2="200" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="170" x2="180" y2="200" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Sound waves from mouth -->
+      <path d="M175,110 C185,100 185,120 175,110" stroke="#FF9800" stroke-width="3" fill="none"/>
+      <path d="M190,110 C205,95 205,125 190,110" stroke="#FF9800" stroke-width="3" fill="none"/>
+      <path d="M210,110 C230,90 230,130 210,110" stroke="#FF9800" stroke-width="3" fill="none"/>
+    
+</svg>

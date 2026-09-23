@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  <rect width="320" height="320" fill="white"/>
+  
+      <!-- Person kicking a ball -->
+      <circle cx="140" cy="90" r="25" fill="#FFB74D"/>
+      <line x1="140" y1="115" x2="140" y2="195" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Arms up (celebrating) -->
+      <line x1="140" y1="145" x2="100" y2="110" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="145" x2="180" y2="110" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Legs - one kicking -->
+      <line x1="140" y1="195" x2="110" y2="270" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="140" y1="195" x2="190" y2="240" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Ball -->
+      <circle cx="220" cy="230" r="20" fill="#FF5722" stroke="#E64A19" stroke-width="2"/>
+      <path d="M210,220 L230,240" stroke="white" stroke-width="2"/>
+      <path d="M230,220 L210,240" stroke="white" stroke-width="2"/>
+    
+</svg>

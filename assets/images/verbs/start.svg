@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  <rect width="320" height="320" fill="white"/>
+  
+      <!-- Play/start button symbol -->
+      <circle cx="160" cy="160" r="80" fill="none" stroke="#4CAF50" stroke-width="6"/>
+      <polygon points="135,110 135,210 220,160" fill="#4CAF50"/>
+    
+</svg>

@@ -8,7 +8,9 @@
 import { openDB, seedIfNeeded, getAll, getSettings }  from './db.js';
 import { setVoice, getAvailableVoices, setRate }       from './speech.js';
 import { createElement, render as renderInto,
-         getGreeting, getTodayKey, formatTime }         from './utils.js';
+         getGreeting, getTodayKey, formatTime,
+         getTodayTheme }                              from './utils.js';
+import { startSession, getSession }                   from './session.js';
 
 /* ================================================================
    GLOBALS
@@ -31,6 +33,7 @@ async function loadScreen(route) {
         case 'sequences':       return await import('./screens/sequences.js');
         case 'pronunciation':   return await import('./screens/pronunciation.js');
         case 'sentence-builder':return await import('./screens/sentence-builder.js');
+        case 'pronoun-nouns':   return await import('./screens/pronoun-nouns.js');
         case 'verbs-pronouns':  return await import('./screens/verbs-pronouns.js');
         case 'conversation':    return await import('./screens/conversation.js');
         case 'comm-board':      return await import('./screens/comm-board.js');
@@ -60,7 +63,7 @@ async function handleRoute() {
 
     // Nav bar (hidden during exercises and session-complete)
     const exerciseRoutes = ['word-retrieval', 'words-select', 'sequences', 'pronunciation', 'sentence-builder',
-                            'verbs-pronouns', 'conversation', 'session-complete', 'session-setup'];
+                            'pronoun-nouns', 'verbs-pronouns', 'conversation', 'session-complete', 'session-setup'];
     if (!exerciseRoutes.includes(route)) {
         appEl.appendChild(createNavBar(route));
     }
@@ -244,15 +247,42 @@ async function renderHome(container) {
         container.appendChild(installBanner);
     }
 
+    /* ── Today's Theme ────────────────────────────────── */
+    const todayTheme = getTodayTheme(allSessions.length);
+
     /* ── Greeting ─────────────────────────────────────── */
     const greetingEl = createElement('h1', { className: 'home__greeting' }, `${greeting} 👋`);
     const subtitleEl = createElement('p',  { className: 'home__subtitle' }, 'Ready for today\'s practice?');
+
+    /* ── Focus Pill ───────────────────────────────────── */
+    const focusPill = createElement('div', { className: 'home__focus-pill', id: 'today-focus-pill' }, [
+        createElement('span', { className: 'home__focus-pill__emoji', 'aria-hidden': 'true' }, todayTheme.emoji),
+        createElement('span', {}, `Today's focus: `),
+        createElement('strong', {}, todayTheme.label),
+    ]);
 
     /* ── Start Session ────────────────────────────────── */
     const startBtn = createElement('button', {
         className: 'btn btn--primary-lg home__session-btn',
         id: 'start-session-btn',
-        onClick: () => navigate('session-setup'),
+        onClick: async () => {
+            startBtn.disabled    = true;
+            startBtn.textContent = 'Preparing…';
+            try {
+                await startSession(['words', 'sentences', 'pronoun-nouns', 'sentences-visual']);
+                const s = getSession();
+                if (s.queue.length > 0) {
+                    navigate(s.queue[0].type);
+                } else {
+                    startBtn.disabled    = false;
+                    startBtn.textContent = '▶  Start Today\'s Session';
+                }
+            } catch (err) {
+                console.error('Failed to auto-start session:', err);
+                startBtn.disabled    = false;
+                startBtn.textContent = '▶  Start Today\'s Session';
+            }
+        },
     }, '▶  Start Today\'s Session');
 
     /* ── Progress line ────────────────────────────────── */
@@ -271,6 +301,7 @@ async function renderHome(container) {
         { route: 'sentence-builder',  icon: '🧩', bg: 'var(--color-card-light)',   title: 'Sentences',        sub: 'Build sentences from words' },
         { route: 'verbs-pronouns',    icon: '🏃', bg: 'var(--color-card-light)',   title: 'Verbs & Pronouns', sub: 'Action words and subjects' },
         { route: 'conversation',      icon: '💬', bg: 'var(--color-card-light)',   title: 'Conversation',     sub: 'Open-ended practice' },
+        { route: 'session-setup',     icon: '⚙️', bg: 'var(--color-card-light)',   title: 'Custom Session',   sub: 'Choose specific exercise categories' },
     ];
 
     const catGrid = createElement('div', { className: 'home__categories' });
@@ -303,7 +334,7 @@ async function renderHome(container) {
         mkStat(String(toPractice), 'To Practice'),
     ]);
 
-    container.append(greetingEl, subtitleEl, startBtn, progressLine,
+    container.append(greetingEl, subtitleEl, focusPill, startBtn, progressLine,
                      sectionTitle, catGrid, commBtn, statsTitle, statsRow);
 }
 

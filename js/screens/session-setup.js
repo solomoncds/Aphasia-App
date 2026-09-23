@@ -3,11 +3,14 @@
  *
  * "Today's session · About 30 minutes"
  * Toggle focus areas → Begin → builds exercise queue → navigates to first exercise.
+ *
+ * Category list is sourced from SESSION_CATEGORIES in utils.js — the single
+ * canonical list shared with session.js buildSegment() so keys always match.
  */
 
-import { createElement }                    from '../utils.js';
-import { getSettings }                       from '../db.js';
-import { startSession, getSession }          from '../session.js';
+import { createElement, SESSION_CATEGORIES }  from '../utils.js';
+import { getSettings }                         from '../db.js';
+import { startSession, getSession }            from '../session.js';
 
 export async function render(container) {
     container.innerHTML = '';
@@ -20,41 +23,52 @@ export async function render(container) {
     const subtitle = createElement('p',  { className: 'session-setup__subtitle' }, `About ${minutes} minutes of practice`);
 
     /* ── Focus areas ─────────────────────────────────── */
-    const AREAS = [
-        { key: 'words',         icon: '🗣️', label: 'Word Retrieval',      desc: 'Find and say words with hints' },
-        { key: 'pronunciation', icon: '🔊', label: 'Pronunciation Drill', desc: 'Listen and repeat words' },
-        { key: 'verbs',         icon: '🏃', label: 'Verbs & Pronouns',    desc: 'Action words and subject pronouns' },
-        { key: 'sentences',     icon: '🧩', label: 'Sentence Building',   desc: 'Arrange words into sentences' },
-        { key: 'conversation',  icon: '💬', label: 'Conversation',        desc: 'Open-ended speaking practice' },
-    ];
+    // Pre-select all enabled categories
+    const selected = new Set(
+        SESSION_CATEGORIES.filter(a => !a.disabled).map(a => a.key)
+    );
 
-    const selected = new Set(AREAS.map(a => a.key));
-    const list     = createElement('div', { className: 'session-setup__focus-list' });
+    const list = createElement('div', { className: 'session-setup__focus-list' });
 
-    for (const area of AREAS) {
+    for (const area of SESSION_CATEGORIES) {
+        const isDisabled = !!area.disabled;
+
         const item = createElement('label', {
-            className: 'session-setup__focus-item session-setup__focus-item--active',
-            style: { cursor: 'pointer' },
+            className: `session-setup__focus-item${isDisabled ? ' session-setup__focus-item--disabled' : ' session-setup__focus-item--active'}`,
+            style: { cursor: isDisabled ? 'default' : 'pointer' },
         });
 
         const cb     = createElement('input', { type: 'checkbox', className: 'toggle__input' });
-        cb.checked   = true;
+        cb.checked   = !isDisabled;
+        cb.disabled  = isDisabled;
         const slider = createElement('span', { className: 'toggle__slider' });
 
-        const body = createElement('div', { className: 'flex-col', style: { marginLeft: 'var(--sp-3)' } }, [
+        const labelRow = createElement('div', { className: 'flex-row align-center gap-2' }, [
             createElement('span', { className: 'fw-semibold' }, `${area.icon}  ${area.label}`),
+        ]);
+
+        if (isDisabled) {
+            labelRow.appendChild(
+                createElement('span', { className: 'badge badge--amber', style: { fontSize: '0.7rem', padding: '2px 6px' } }, 'Coming soon')
+            );
+        }
+
+        const body = createElement('div', { className: 'flex-col', style: { marginLeft: 'var(--sp-3)' } }, [
+            labelRow,
             createElement('span', { className: 'text-sm text-secondary' }, area.desc),
         ]);
 
-        cb.addEventListener('change', () => {
-            if (cb.checked) {
-                selected.add(area.key);
-                item.classList.add('session-setup__focus-item--active');
-            } else {
-                selected.delete(area.key);
-                item.classList.remove('session-setup__focus-item--active');
-            }
-        });
+        if (!isDisabled) {
+            cb.addEventListener('change', () => {
+                if (cb.checked) {
+                    selected.add(area.key);
+                    item.classList.add('session-setup__focus-item--active');
+                } else {
+                    selected.delete(area.key);
+                    item.classList.remove('session-setup__focus-item--active');
+                }
+            });
+        }
 
         item.append(cb, slider, body);
         list.appendChild(item);

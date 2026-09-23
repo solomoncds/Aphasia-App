@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  <rect width="320" height="320" fill="white"/>
+  
+      <!-- Person holding a cup -->
+      <circle cx="160" cy="90" r="28" fill="#FFB74D"/>
+      <line x1="160" y1="118" x2="160" y2="210" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="160" y1="210" x2="130" y2="280" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="160" y1="210" x2="190" y2="280" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Arms holding -->
+      <line x1="160" y1="150" x2="120" y2="170" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="120" y1="170" x2="130" y2="190" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="160" y1="150" x2="200" y2="170" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <line x1="200" y1="170" x2="190" y2="190" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+      <!-- Cup being held -->
+      <rect x="125" y="185" width="70" height="45" rx="5" fill="#42A5F5"/>
+      <rect x="120" y="180" width="80" height="10" rx="3" fill="#1E88E5"/>
+    
+</svg>

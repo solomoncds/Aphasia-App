@@ -198,3 +198,90 @@ export const CATEGORIES = {
     number:  { label: 'Numbers',       emoji: '🔢', color: 'var(--accent-purple)' },
     phrase:  { label: 'Phrases',       emoji: '💬', color: 'var(--accent-rose)' }
 };
+
+export const POSSESSIVE_PRONOUNS = [
+    { text: 'my',    person: '1st', number: 'singular' },
+    { text: 'your',  person: '2nd', number: 'singular/plural' },
+    { text: 'his',   person: '3rd', number: 'singular', gender: 'masculine' },
+    { text: 'her',   person: '3rd', number: 'singular', gender: 'feminine' },
+    { text: 'our',   person: '1st', number: 'plural' },
+    { text: 'their', person: '3rd', number: 'plural' },
+];
+
+/**
+ * Canonical session-category list.
+ * Single source of truth used by Session Setup checkboxes AND session.js buildSegment().
+ * The `key` values map 1-to-1 to switch-case labels in buildSegment().
+ * `disabled` categories are shown in the UI but cannot be toggled on.
+ */
+export const SESSION_CATEGORIES = [
+    { key: 'words',            icon: '🗣️', label: 'Words',                 desc: 'Find and say words with picture hints' },
+    { key: 'sentences',        icon: '🧩', label: 'Sentences',             desc: 'Build sentences from today\'s words' },
+    { key: 'pronoun-nouns',    icon: '👥', label: 'Pronoun + Noun',        desc: 'His knife, her spoon, my cup' },
+    { key: 'sentences-visual', icon: '🖼️', label: 'Visual Sentences',      desc: 'Sentence building with picture cards' },
+    { key: 'verbs-pronouns',   icon: '🏃', label: 'Verbs & Pronouns',      desc: 'Action words and subject pronouns' },
+    { key: 'pronunciation',    icon: '🔊', label: 'Pronunciation Drill',   desc: 'Listen and repeat words clearly' },
+    { key: 'sequences',        icon: '🔢', label: 'Sequences',             desc: 'Days, months, alphabet & prayer' },
+    { key: 'conversation',     icon: '💬', label: 'Conversation Practice', desc: 'Open-ended speaking practice' },
+    { key: 'comprehension',    icon: '🧠', label: 'Comprehension',         desc: 'Coming soon — not yet available', disabled: true },
+];
+
+/* ========== Themed Daily Sessions ========== */
+
+/**
+ * 11-slot noun-theme rotation table.
+ * Each entry has:
+ *   key   — matches the `theme` field used in nouns.js
+ *   label — human-readable display name
+ *   emoji — used on the Home screen pill
+ *   texts — (optional) allowlist of exact noun texts; used for the 11th slot
+ *           to isolate "Important Items" from the broader 'household' group.
+ */
+export const NOUN_THEMES = [
+    { key: 'kitchen',    label: 'Kitchen',         emoji: '🍳' },
+    { key: 'food-drink', label: 'Food & Drink',    emoji: '🥗' },
+    { key: 'bathroom',   label: 'Bathroom',        emoji: '🚿' },
+    { key: 'bedroom',    label: 'Bedroom',         emoji: '🛏️' },
+    { key: 'body',       label: 'Body Parts',      emoji: '🫀' },
+    { key: 'clothing',   label: 'Clothing',        emoji: '👕' },
+    { key: 'transport',  label: 'Transport',       emoji: '🚗' },
+    { key: 'outdoors',   label: 'Outdoors',        emoji: '🌳' },
+    { key: 'household',  label: 'Household',       emoji: '🏠',
+      texts: null },    // all household nouns (table, phone, book, pen, bag, box)
+    { key: 'technology', label: 'Technology',      emoji: '📺' },
+    { key: 'household',  label: 'Everyday Items',  emoji: '💊',
+      texts: ['medicine', 'money', 'paper'] },  // isolated important-items subset
+];
+
+/**
+ * Return today's theme entry based on total completed sessions.
+ * @param {number} totalSessions — length of the sessions store
+ * @returns {object} NOUN_THEMES entry
+ */
+export function getTodayTheme(totalSessions) {
+    return NOUN_THEMES[totalSessions % NOUN_THEMES.length];
+}
+
+/**
+ * Filter allWords down to nouns that belong to the given theme entry.
+ * Respects the optional `texts` allowlist for the 11th slot.
+ * @param {{ key: string, texts?: string[]|null }} themeEntry
+ * @param {object[]} allWords — full words array from IndexedDB
+ * @returns {object[]}
+ */
+export function getThemeNouns(themeEntry, allWords) {
+    return allWords.filter(w => {
+        if (w.category !== 'noun') return false;
+        if (w.theme !== themeEntry.key) return false;
+        if (themeEntry.texts) {
+            return themeEntry.texts.includes(w.text.toLowerCase());
+        }
+        // Slot 8 (household) must EXCLUDE the texts-listed important-items words
+        // so the two household slots don't overlap.
+        if (themeEntry.key === 'household' && !themeEntry.texts) {
+            const importantItems = ['medicine', 'money', 'paper'];
+            return !importantItems.includes(w.text.toLowerCase());
+        }
+        return true;
+    });
+}
