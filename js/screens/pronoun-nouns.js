@@ -131,7 +131,11 @@ export async function render(container) {
 
         step       = 1;
         reported   = false;
-        isSpeaking = false;
+        const isLast = currentIdx >= items.length - 1;
+        const topNext = document.getElementById('pn-top-next');
+        if (topNext) {
+            topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+        }
 
         document.getElementById('pn-counter').textContent =
             `${currentIdx + 1} / ${items.length}`;

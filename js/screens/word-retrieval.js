@@ -135,7 +135,13 @@ export async function render(container) {
         reported   = false;
         isSpeaking = false;
 
-        // Counter
+        // Counter & Progress
+        const isLast = currentIdx >= items.length - 1;
+        const topNext = document.getElementById('wr-top-next');
+        if (topNext) {
+            topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+        }
+
         document.getElementById('wr-counter').textContent =
             `${currentIdx + 1} / ${items.length}`;
 

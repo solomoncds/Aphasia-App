@@ -83,8 +83,11 @@ export async function render(container) {
         const item = items[currentIdx];
         if (!item) { finish(); return; }
 
-        step     = 0;
-        reported = false;
+        const isLast = currentIdx >= items.length - 1;
+        const topNext = document.getElementById('vp-top-next');
+        if (topNext) {
+            topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+        }
 
         document.getElementById('vp-counter').textContent = `${currentIdx + 1} / ${items.length}`;
         document.getElementById('vp-fill').style.width    = `${(currentIdx / items.length) * 100}%`;

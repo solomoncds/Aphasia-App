@@ -106,7 +106,13 @@ export async function render(container) {
         let workspace = [];
         let solved    = false;
 
-        // Update counter
+        // Update counter & top next button
+        const isLast = currentIdx >= items.length - 1;
+        const topNext = document.getElementById('sb-top-next');
+        if (topNext) {
+            topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+        }
+
         document.getElementById('sb-counter').textContent = `${currentIdx + 1} / ${items.length}`;
         document.getElementById('sb-fill').style.width    = `${(currentIdx / items.length) * 100}%`;
 

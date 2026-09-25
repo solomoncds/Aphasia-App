@@ -75,7 +75,11 @@ export async function render(container) {
         const word = items[currentIdx];
         if (!word) { finish(); return; }
 
-        reported = false;
+        const isLast = currentIdx >= items.length - 1;
+        const topNext = document.getElementById('pronun-top-next');
+        if (topNext) {
+            topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+        }
 
         document.getElementById('pn-counter').textContent = `${currentIdx + 1} / ${items.length}`;
         document.getElementById('pn-fill').style.width    = `${(currentIdx / items.length) * 100}%`;

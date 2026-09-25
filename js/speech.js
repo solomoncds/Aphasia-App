@@ -6,7 +6,42 @@
  * No cloud TTS service — everything runs on-device.
  */
 
-let selectedVoice = null;
+let cachedVoice = null;
+let preferredVoiceURI = null;
+
+function updateCachedVoice() {
+    if (!isSpeechSupported()) return;
+    const voices = speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return;
+
+    if (preferredVoiceURI) {
+        const found = voices.find(v => v.voiceURI === preferredVoiceURI);
+        if (found) {
+            cachedVoice = found;
+            return;
+        }
+    }
+
+    cachedVoice = voices.find(v => v.name && v.name.includes('Hazel'))
+               || voices.find(v => v.lang && v.lang.startsWith('en'))
+               || voices[0]
+               || null;
+}
+
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = () => {
+        updateCachedVoice();
+    };
+    updateCachedVoice();
+
+    // Keep-alive workaround for the idle-stall bug — pings speech engine every 10s
+    setInterval(() => {
+        if (!speechSynthesis.speaking) {
+            speechSynthesis.pause();
+            speechSynthesis.resume();
+        }
+    }, 10000);
+}
 
 /* ========== Voice Management ========== */
 
@@ -17,6 +52,10 @@ let selectedVoice = null;
  */
 export function getAvailableVoices() {
     return new Promise((resolve) => {
+        if (!isSpeechSupported()) {
+            resolve([]);
+            return;
+        }
         let voices = speechSynthesis.getVoices();
         if (voices.length > 0) {
             resolve(filterEnglish(voices));
@@ -41,15 +80,21 @@ function filterEnglish(voices) {
  * @param {string} voiceURI
  */
 export function setVoice(voiceURI) {
+    preferredVoiceURI = voiceURI || null;
+    if (!isSpeechSupported()) return;
     const voices = speechSynthesis.getVoices();
-    selectedVoice = voices.find(v => v.voiceURI === voiceURI) || null;
+    if (voiceURI) {
+        cachedVoice = voices.find(v => v.voiceURI === voiceURI) || cachedVoice;
+    } else {
+        updateCachedVoice();
+    }
 }
 
 /**
  * Get the currently selected voice URI (or null).
  */
 export function getSelectedVoiceURI() {
-    return selectedVoice ? selectedVoice.voiceURI : null;
+    return cachedVoice ? cachedVoice.voiceURI : null;
 }
 
 let currentRate = 0.6;
@@ -202,8 +247,8 @@ export async function speak(text, rate = currentRate) {
         utt.pitch  = 1;
         utt.volume = 1;
 
-        if (selectedVoice) {
-            utt.voice = selectedVoice;
+        if (cachedVoice) {
+            utt.voice = cachedVoice;
         }
 
         utt.onend = () => resolve();
@@ -234,8 +279,8 @@ export function speakHint(text, rate = currentRate) {
     utt.pitch  = 1;
     utt.volume = 1;
 
-    if (selectedVoice) {
-        utt.voice = selectedVoice;
+    if (cachedVoice) {
+        utt.voice = cachedVoice;
     }
 
     speechSynthesis.speak(utt);
