@@ -7,7 +7,7 @@
  * Cache invalidation: bump CACHE_VERSION when files change.
  */
 
-const CACHE_VERSION = 'v14';
+const CACHE_VERSION = 'v15';
 const CACHE_NAME = `speech-practice-${CACHE_VERSION}`;
 
 const APP_SHELL = [
