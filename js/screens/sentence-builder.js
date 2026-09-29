@@ -123,13 +123,22 @@ export async function render(container) {
         body.appendChild(createElement('div', { className: 'badge badge--blue mb-2' },
             `Level ${sentence.level} · ${sentence.structure}`));
 
-        // In visual sentence mode, display the noun picture prominently
+        // In visual sentence mode, display the noun picture prominently (tap to hear)
         if (sentence._imageSrc) {
             const nounImg = createElement('img', {
                 src: sentence._imageSrc,
                 alt: sentence._imageWord || 'Noun picture',
-                className: 'photo-preview mb-2',
+                className: 'photo-preview photo-preview--interactive mb-2',
                 style: { maxHeight: '120px', maxWidth: '150px', objectFit: 'contain' },
+                tabIndex: 0,
+                title: `Tap to hear: ${sentence._imageWord || ''}`,
+                onClick: () => speak(sentence._imageWord || sentence.text),
+            });
+            nounImg.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    speak(sentence._imageWord || sentence.text);
+                }
             });
             nounImg.onerror = () => {
                 nounImg.replaceWith(createElement('div', {
