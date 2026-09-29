@@ -450,6 +450,20 @@
     display: block;
 }
 
+.photo-preview--interactive {
+    cursor: pointer;
+    transition: transform var(--ease-fast), box-shadow var(--ease-fast), border-color var(--ease-fast);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.photo-preview--interactive:hover {
+    border-color: var(--color-primary);
+    transform: scale(1.02);
+}
+.photo-preview--interactive:active {
+    transform: scale(0.97);
+}
+
 /* ===== EXERCISE LAYOUT ===== */
 
 .exercise {

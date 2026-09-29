@@ -157,14 +157,36 @@ export async function render(container) {
         const imgEl = createElement('img', {
             src: imageSrc,
             alt: word.text,
-            className: 'photo-preview',
+            className: 'photo-preview photo-preview--interactive',
             style: { maxWidth: '200px' },
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': `Listen to ${word.text}`,
+            onClick: () => playWordAudio(),
+        });
+
+        imgEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playWordAudio();
+            }
         });
 
         imgEl.onerror = () => {
-            imgEl.replaceWith(createElement('div', {
-                className: 'photo-placeholder photo-placeholder--sm',
-            }, '🖼️'));
+            const placeholder = createElement('div', {
+                className: 'photo-placeholder photo-placeholder--sm photo-preview--interactive',
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': `Listen to ${word.text}`,
+                onClick: () => playWordAudio(),
+            }, '🖼️');
+            placeholder.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playWordAudio();
+                }
+            });
+            imgEl.replaceWith(placeholder);
         };
 
         body.appendChild(imgEl);

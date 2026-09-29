@@ -158,13 +158,36 @@ export async function render(container) {
         const imgEl = createElement('img', {
             src: item.nounImageSrc,
             alt: item.noun,
-            className: 'photo-preview',
+            className: 'photo-preview photo-preview--interactive',
             style: { maxWidth: '200px', maxHeight: '180px', objectFit: 'contain' },
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': `Listen to ${item.phrase}`,
+            onClick: playPhraseAudio,
         });
+
+        imgEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playPhraseAudio();
+            }
+        });
+
         imgEl.onerror = () => {
-            imgEl.replaceWith(createElement('div', {
-                className: 'photo-placeholder photo-placeholder--sm',
-            }, '🖼️'));
+            const placeholder = createElement('div', {
+                className: 'photo-placeholder photo-placeholder--sm photo-preview--interactive',
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': `Listen to ${item.phrase}`,
+                onClick: playPhraseAudio,
+            }, '🖼️');
+            placeholder.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playPhraseAudio();
+                }
+            });
+            imgEl.replaceWith(placeholder);
         };
         body.appendChild(imgEl);
 

@@ -104,20 +104,52 @@ export async function render(container) {
         const body = document.getElementById('vp-body');
         body.innerHTML = '';
 
+        // Target text
+        let target;
+        if (step === 0) {
+            target = capitalize(verb);
+        } else if (step === 1) {
+            target = `${capitalize(pronoun.text)} ${verb}`;
+        } else {
+            target = example;
+        }
+
         // Photo: family member for pronoun if available, otherwise verb action image
         const photo = findPhotoForPronoun(pronoun);
         if (photo) {
-            body.appendChild(createElement('img', {
+            const familyImg = createElement('img', {
                 src: photo, alt: pronoun.text || '',
+                className: 'photo-preview--interactive',
                 style: { width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' },
-            }));
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': `Listen to ${target}`,
+                onClick: () => speak(target),
+            });
+            familyImg.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    speak(target);
+                }
+            });
+            body.appendChild(familyImg);
         } else {
             const verbKey = verb.toLowerCase().trim();
             const verbImg = createElement('img', {
                 src: `assets/images/verbs/${verbKey}.png`,
                 alt: verb,
-                className: 'photo-preview mb-3',
+                className: 'photo-preview photo-preview--interactive mb-3',
                 style: { maxWidth: '180px', maxHeight: '180px' },
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': `Listen to ${target}`,
+                onClick: () => speak(target),
+            });
+            verbImg.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    speak(target);
+                }
             });
             verbImg.onerror = () => {
                 // Try SVG fallback before giving up
@@ -133,16 +165,6 @@ export async function render(container) {
         // Step badge
         const stepLabels = ['Step 1: Say the verb', 'Step 2: Pronoun + Verb', 'Step 3: Full sentence'];
         body.appendChild(createElement('div', { className: 'badge badge--blue mt-3 mb-4' }, stepLabels[step]));
-
-        // Target text
-        let target;
-        if (step === 0) {
-            target = capitalize(verb);
-        } else if (step === 1) {
-            target = `${capitalize(pronoun.text)} ${verb}`;
-        } else {
-            target = example;
-        }
 
         body.appendChild(createElement('div', { className: 'exercise__word' }, target));
 
