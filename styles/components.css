@@ -528,13 +528,15 @@
 
 /* Downward arrow between big-prompt and image */
 .exercise__prompt-arrow {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
+    font-weight: var(--fw-bold);
     color: var(--color-primary);
     text-align: center;
     display: block;
     line-height: 1;
     margin: 0;
-    opacity: 0.6;
+    opacity: 1;
+    text-shadow: 0 1px 4px rgba(1, 46, 77, 0.18);
 }
 
 .exercise__hint {

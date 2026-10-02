@@ -62,7 +62,7 @@ export async function render(container) {
     let isSpeaking = false;
 
     /* ── Inactivity timers ───────────────────────────── */
-    let idleTimerA = null;   // 4s — nudge toward hint
+    let idleTimerA = null;   // 4s — speak the word aloud again
     let idleTimerB = null;   // 10s — nudge toward Next
 
     function clearIdleTimers() {
@@ -75,11 +75,8 @@ export async function render(container) {
     function startIdleTimerA() {
         clearIdleTimers();
         idleTimerA = setTimeout(() => {
-            const hintBtn = document.getElementById('wr-hint-btn');
-            if (hintBtn && !reported) {
-                hintBtn.classList.add('btn--nudge');
-                speakHint('Try a hint.');
-            }
+            // After 4s of no interaction, replay the word to help the patient
+            if (!reported) playWordAudio();
         }, 4000);
     }
 
@@ -235,6 +232,13 @@ export async function render(container) {
         };
 
         body.appendChild(imgEl);
+
+        // Word label — always visible below image
+        body.appendChild(createElement('div', {
+            className: 'exercise__word',
+            id: 'wr-word-label',
+            style: { fontSize: 'var(--fs-prompt)', letterSpacing: '0.01em' },
+        }, capitalize(word.text)));
 
         // Actions area containing standalone Hear it button + hint escalation
         const actionsArea = createElement('div', {
@@ -395,14 +399,7 @@ export async function render(container) {
         const encEl = document.getElementById('wr-encouragement');
         encEl.textContent = getEncouragement(report);
 
-        // Show correct word if not already displayed
-        const body = document.getElementById('wr-body');
-        if (!body.querySelector('.exercise__word')) {
-            const reveal = createElement('div', {
-                className: 'exercise__word mt-2', style: { animation: 'fadeIn 0.3s ease' },
-            }, capitalize(word.text));
-            body.appendChild(reveal);
-        }
+        // Word label is always shown from the start — nothing to reveal
 
         // Replace self-report with Next button
         const footer = document.getElementById('wr-footer');
