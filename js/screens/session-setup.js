@@ -20,7 +20,6 @@ export async function render(container) {
 
     /* ── Header ──────────────────────────────────────── */
     const title    = createElement('h1', { className: 'session-setup__title' }, "Today's Session");
-    const subtitle = createElement('p',  { className: 'session-setup__subtitle' }, `About ${minutes} minutes of practice`);
 
     /* ── Focus areas ─────────────────────────────────── */
     // Pre-select all enabled categories
@@ -55,7 +54,6 @@ export async function render(container) {
 
         const body = createElement('div', { className: 'flex-col', style: { marginLeft: 'var(--sp-3)' } }, [
             labelRow,
-            createElement('span', { className: 'text-sm text-secondary' }, area.desc),
         ]);
 
         if (!isDisabled) {
@@ -109,5 +107,5 @@ export async function render(container) {
         onClick: () => { window.location.hash = 'home'; },
     }, '← Back');
 
-    container.append(title, subtitle, list, beginBtn, backBtn);
+    container.append(title, list, beginBtn, backBtn);
 }

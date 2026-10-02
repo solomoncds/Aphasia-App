@@ -155,7 +155,7 @@
 
 .self-report {
     display: flex;
-    gap: var(--sp-2);
+    gap: var(--sp-3);
     width: 100%;
 }
 
@@ -166,12 +166,12 @@
     align-items: center;
     gap: var(--sp-1);
     padding: var(--sp-3) var(--sp-2);
-    min-height: 68px;
+    min-height: 60px;
     border-radius: var(--radius-sm);
-    font-size: var(--fs-caption);
-    font-weight: var(--fw-semibold);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-bold);
     cursor: pointer;
-    border: 1px solid var(--color-card);
+    border: 2px solid var(--color-card);
     background: var(--color-white);
     transition: all var(--ease-fast);
     user-select: none;
@@ -179,6 +179,7 @@
 
 .self-report__btn:active {
     opacity: 0.85;
+    transform: scale(0.97);
 }
 
 .self-report__icon {
@@ -186,42 +187,47 @@
     line-height: 1;
 }
 
-/* "I said it" — green */
-.self-report__btn--success {
+/* ✓ Got it — green */
+.self-report__btn--got-it {
     background: #EDF7F0;
     color: #1E6B37;
     border-color: #237844;
 }
-.self-report__btn--success:hover {
-    background: #E1F2E6;
+.self-report__btn--got-it:hover {
+    background: #D6EFDD;
     border-color: #1E6B37;
 }
 
-/* "Needed help" — amber / gold */
-.self-report__btn--help {
-    background: #FEF7EC;
-    color: #B25E09;
-    border-color: var(--color-accent-gold);
-}
-.self-report__btn--help:hover {
-    background: #FDF0DE;
-    border-color: #B25E09;
-}
-
-/* "Couldn't say it" — rose */
-.self-report__btn--unable {
+/* ✗ Didn't get it — rose */
+.self-report__btn--didnt-get-it {
     background: #FDF0EE;
     color: #A93226;
     border-color: #C0392B;
 }
-.self-report__btn--unable:hover {
+.self-report__btn--didnt-get-it:hover {
     background: #FBE5E3;
     border-color: #A93226;
 }
 
+/* Legacy variants kept for any non-migrated screens */
+.self-report__btn--success  { background: #EDF7F0; color: #1E6B37; border-color: #237844; }
+.self-report__btn--help     { background: #FEF7EC; color: #B25E09; border-color: var(--color-accent-gold); }
+.self-report__btn--unable   { background: #FDF0EE; color: #A93226; border-color: #C0392B; }
+
 /* Pulse animation when selected */
 .self-report__btn--selected {
     outline: 2px solid var(--color-primary);
+}
+
+/* ===== INACTIVITY NUDGE ===== */
+
+@keyframes nudgePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(1, 46, 77, 0.35); }
+    50%       { box-shadow: 0 0 0 6px rgba(1, 46, 77, 0); }
+}
+.btn--nudge {
+    border-color: var(--color-primary) !important;
+    animation: nudgePulse 1.4s ease-in-out infinite;
 }
 
 /* ===== CARDS ===== */
@@ -441,7 +447,8 @@
 
 .photo-preview {
     width: 100%;
-    max-width: 220px;
+    max-width: 200px;
+    max-height: 160px;
     aspect-ratio: 1;
     object-fit: cover;
     border-radius: var(--radius-sm);
@@ -490,9 +497,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--sp-4);
+    gap: var(--sp-2);
     text-align: center;
-    padding: var(--sp-4) 0;
+    padding: var(--sp-2) 0;
 }
 
 .exercise__word {
@@ -502,13 +509,36 @@
     line-height: 1.2;
 }
 
+/* Standard sub-prompt (used in pronouns, verbs etc.) */
 .exercise__prompt {
     font-size: var(--fs-body);
     color: var(--text-secondary);
+    margin-top: 0;
+}
+
+/* Dominant instructional prompt — Word Retrieval "What is this?" */
+.exercise__big-prompt {
+    font-size: var(--fs-xl, 1.5rem);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+/* Downward arrow between big-prompt and image */
+.exercise__prompt-arrow {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    text-align: center;
+    display: block;
+    line-height: 1;
+    margin: 0;
+    opacity: 0.6;
 }
 
 .exercise__hint {
-    padding: var(--sp-3) var(--sp-4);
+    padding: var(--sp-2) var(--sp-4);
     background: #FEF7EC;
     border: 1px solid var(--color-accent-gold);
     border-radius: var(--radius-sm);
@@ -518,7 +548,7 @@
     text-align: center;
     max-width: 400px;
     width: 100%;
-    min-height: 48px;
+    min-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -528,23 +558,23 @@
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     color: #237844;
-    min-height: 28px;
+    min-height: 20px;
 }
 
 .exercise__actions {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--sp-2);
     width: 100%;
     max-width: 400px;
     padding: 0 var(--sp-5);
 }
 
 .exercise__footer {
-    padding: var(--sp-5) 0;
+    padding: var(--sp-3) 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
+    gap: var(--sp-2);
 }
 
 /* ===== PROGRESS INDICATORS ===== */
@@ -1232,16 +1262,16 @@
     }
 
     .exercise__body {
-        padding: var(--sp-4) var(--sp-2);
-        gap: var(--sp-4);
-    }
-
-    .self-report {
+        padding: var(--sp-2) var(--sp-2);
         gap: var(--sp-2);
     }
 
+    .self-report {
+        gap: var(--sp-3);
+    }
+
     .self-report__btn {
-        min-height: 72px;
+        min-height: 60px;
         padding: var(--sp-3) var(--sp-2);
     }
 

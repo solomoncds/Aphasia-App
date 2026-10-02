@@ -61,6 +61,39 @@ export async function render(container) {
     let reported   = false;
     let isSpeaking = false;
 
+    /* ── Inactivity timers ───────────────────────────── */
+    let idleTimerA = null;   // 4s — nudge toward hint
+    let idleTimerB = null;   // 10s — nudge toward Next
+
+    function clearIdleTimers() {
+        clearTimeout(idleTimerA);
+        clearTimeout(idleTimerB);
+        idleTimerA = null;
+        idleTimerB = null;
+    }
+
+    function startIdleTimerA() {
+        clearIdleTimers();
+        idleTimerA = setTimeout(() => {
+            const hintBtn = document.getElementById('wr-hint-btn');
+            if (hintBtn && !reported) {
+                hintBtn.classList.add('btn--nudge');
+                speakHint('Try a hint.');
+            }
+        }, 4000);
+    }
+
+    function startIdleTimerB() {
+        clearIdleTimers();
+        idleTimerB = setTimeout(() => {
+            const topNext = document.getElementById('wr-top-next');
+            if (topNext) topNext.classList.add('btn--nudge');
+            const footerNext = document.querySelector('#wr-footer .btn--primary-lg');
+            if (footerNext) footerNext.classList.add('btn--nudge');
+            speak('Ready for the next one?');
+        }, 10000);
+    }
+
     /* ── Word Audio Playback ─────────────────────────── */
     async function playWordAudio() {
         const word = items[currentIdx];
@@ -140,6 +173,7 @@ export async function render(container) {
         const topNext = document.getElementById('wr-top-next');
         if (topNext) {
             topNext.textContent = isLast ? (inSession ? 'Done ✓' : 'Finish ✓') : 'Next →';
+            topNext.classList.remove('btn--nudge');
         }
 
         document.getElementById('wr-counter').textContent =
@@ -152,6 +186,15 @@ export async function render(container) {
         const body = document.getElementById('wr-body');
         body.innerHTML = '';
 
+        // ── Task 4: Dominant "What is this?" ABOVE image ──
+        body.appendChild(createElement('p', {
+            className: 'exercise__big-prompt',
+        }, 'What is this?'));
+
+        body.appendChild(createElement('span', {
+            className: 'exercise__prompt-arrow',
+        }, '↓'));
+
         // Image / placeholder (custom user photo > static downloaded noun asset > placeholder emoji)
         const imageSrc = word.imageDataUrl || `assets/images/nouns/${word.text.toLowerCase().trim()}.png`;
         const imgEl = createElement('img', {
@@ -162,12 +205,13 @@ export async function render(container) {
             role: 'button',
             tabIndex: 0,
             'aria-label': `Listen to ${word.text}`,
-            onClick: () => playWordAudio(),
+            onClick: () => { clearIdleTimers(); startIdleTimerA(); playWordAudio(); },
         });
 
         imgEl.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                clearIdleTimers(); startIdleTimerA();
                 playWordAudio();
             }
         });
@@ -178,11 +222,12 @@ export async function render(container) {
                 role: 'button',
                 tabIndex: 0,
                 'aria-label': `Listen to ${word.text}`,
-                onClick: () => playWordAudio(),
+                onClick: () => { clearIdleTimers(); startIdleTimerA(); playWordAudio(); },
             }, '🖼️');
             placeholder.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    clearIdleTimers(); startIdleTimerA();
                     playWordAudio();
                 }
             });
@@ -191,15 +236,10 @@ export async function render(container) {
 
         body.appendChild(imgEl);
 
-        // Prompt
-        body.appendChild(createElement('p', {
-            className: 'exercise__prompt mt-4',
-        }, 'What is this?'));
-
         // Actions area containing standalone Hear it button + hint escalation
         const actionsArea = createElement('div', {
             id: 'wr-actions',
-            className: 'exercise__actions mt-4',
+            className: 'exercise__actions',
         });
         body.appendChild(actionsArea);
 
@@ -207,7 +247,7 @@ export async function render(container) {
         const hearBtn = createElement('button', {
             className: 'btn btn--primary w-full',
             id: 'wr-hear-btn',
-            onClick: () => playWordAudio(),
+            onClick: () => { clearIdleTimers(); startIdleTimerA(); playWordAudio(); },
         }, '🔊  Hear it');
         actionsArea.appendChild(hearBtn);
 
@@ -218,21 +258,24 @@ export async function render(container) {
         });
         actionsArea.appendChild(hintArea);
 
-        // Hint button
+        // Hint button — Task 5: shorter label
         const hintBtn = createElement('button', {
             className: 'btn btn--secondary w-full',
             id: 'wr-hint-btn',
-        }, '💡  Need a hint?');
-        hintBtn.addEventListener('click', showNextHint);
+        }, '💡  Hint 1');
+        hintBtn.addEventListener('click', () => { clearIdleTimers(); startIdleTimerA(); showNextHint(); });
         hintArea.appendChild(hintBtn);
 
         // Encouragement placeholder
         body.appendChild(createElement('div', {
-            id: 'wr-encouragement', className: 'exercise__encouragement mt-4',
+            id: 'wr-encouragement', className: 'exercise__encouragement',
         }));
 
         // Self-report
         renderSelfReport();
+
+        // Start idle timer A
+        startIdleTimerA();
     }
 
     function playHintSpeech(text) {
@@ -259,16 +302,19 @@ export async function render(container) {
             const hint = createElement('div', { className: 'exercise__hint' },
                 `💡 ${word.meaningHint}`);
             hintArea.insertBefore(hint, hintBtn);
-            hintBtn.textContent = '🔤  Another hint?';
+            // Task 5: shorter label
+            hintBtn.textContent = '🔤  Hint 2';
+            hintBtn.classList.remove('btn--nudge');
             playHintSpeech(word.meaningHint);
 
         } else if ((hintLevel === 2 || (hintLevel === 1 && !word.meaningHint)) && word.firstSoundHint) {
             // First-sound hint
-            if (hintLevel === 1) hintLevel = 2; // skip meaning if verb
+            if (hintLevel === 1) hintLevel = 2; // skip meaning if no meaning hint
             const hint = createElement('div', { className: 'exercise__hint' },
                 `🔤 ${word.firstSoundHint}`);
             hintArea.insertBefore(hint, hintBtn);
-            hintBtn.textContent = '🔊  Let me hear it';
+            hintBtn.textContent = '🔊  Hear it';
+            hintBtn.classList.remove('btn--nudge');
             playHintSpeech(word.firstSoundHint);
 
         } else {
@@ -276,7 +322,7 @@ export async function render(container) {
             hintLevel = 3;
             hintBtn.remove();
 
-            // Render word using large/bold typography matching verb screen text-only fallback
+            // Render word using large/bold typography
             const wordDisplay = createElement('div', {
                 className: 'exercise__word mt-2 mb-2',
                 style: { animation: 'fadeIn 0.3s ease' },
@@ -288,59 +334,58 @@ export async function render(container) {
             // Add "hear again" button
             const againBtn = createElement('button', {
                 className: 'btn btn--ghost w-full mt-2',
-                onClick: () => playWordAudio(),
+                onClick: () => { clearIdleTimers(); startIdleTimerA(); playWordAudio(); },
             }, '🔊  Hear again');
             hintArea.appendChild(againBtn);
         }
     }
 
-    /* ── Self-Report Buttons ─────────────────────────── */
+    /* ── Self-Report Buttons (2-button, inferred status) ── */
     function renderSelfReport() {
         const footer = document.getElementById('wr-footer');
         footer.innerHTML = '';
 
-        const label = createElement('p', {
-            className: 'text-center text-sm text-secondary mb-3',
-        }, 'How did you do?');
-
         const group = createElement('div', { className: 'self-report' });
 
-        const btns = [
-            { report: 'independent', cls: 'self-report__btn--success', icon: '✓', label: 'I said it' },
-            { report: 'cue',         cls: 'self-report__btn--help',    icon: '↻', label: 'Needed help' },
-            { report: 'unable',      cls: 'self-report__btn--unable',  icon: '→', label: "Couldn't say it" },
-        ];
+        const gotItBtn = createElement('button', {
+            className: 'self-report__btn self-report__btn--got-it',
+        }, [
+            createElement('span', { className: 'self-report__icon' }, '✓'),
+            createElement('span', {}, 'Got it'),
+        ]);
+        gotItBtn.addEventListener('click', () => {
+            // Infer status from hint level reached
+            const inferredReport = hintLevel === 0 ? 'independent'
+                                 : hintLevel <= 2  ? 'cue'
+                                 :                   'model';
+            handleReport(inferredReport);
+        });
 
-        for (const b of btns) {
-            const btn = createElement('button', {
-                className: `self-report__btn ${b.cls}`,
-            }, [
-                createElement('span', { className: 'self-report__icon' }, b.icon),
-                createElement('span', {}, b.label),
-            ]);
-            btn.addEventListener('click', () => handleReport(b.report));
-            group.appendChild(btn);
-        }
+        const didntBtn = createElement('button', {
+            className: 'self-report__btn self-report__btn--didnt-get-it',
+        }, [
+            createElement('span', { className: 'self-report__icon' }, '✗'),
+            createElement('span', {}, "Didn't get it"),
+        ]);
+        didntBtn.addEventListener('click', () => handleReport('unable'));
 
-        const skipBtn = createElement('button', {
-            className: 'btn btn--ghost w-full mt-3',
-            style: { color: 'var(--text-secondary)' },
-            onClick: () => goNext('skipped'),
-        }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
-
-        footer.append(label, group, skipBtn);
+        group.append(gotItBtn, didntBtn);
+        footer.appendChild(group);
     }
 
     /* ── Handle Report ───────────────────────────────── */
     async function handleReport(report) {
         if (reported) return;
         reported = true;
+        clearIdleTimers();
 
         const word = items[currentIdx];
 
         // Update word status in DB
         word.status          = report === 'independent' ? 'independent'
-                              : report === 'cue'        ? 'cue' : 'unable';
+                              : report === 'cue'        ? 'cue'
+                              : report === 'model'      ? 'model'
+                              : 'unable';
         word.timesAttempted  = (word.timesAttempted || 0) + 1;
         if (report === 'independent') word.timesIndependent = (word.timesIndependent || 0) + 1;
         word.lastPracticed   = new Date().toISOString();
@@ -368,10 +413,14 @@ export async function render(container) {
             onClick: () => goNext(report),
         }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
         footer.appendChild(nextBtn);
+
+        // Start idle timer B — nudge toward Next after 10s
+        startIdleTimerB();
     }
 
     /* ── Next / Finish ───────────────────────────────── */
     function goNext(report = 'skipped') {
+        clearIdleTimers();
         stopSpeaking();
         isSpeaking = false;
 
@@ -400,6 +449,7 @@ export async function render(container) {
     }
 
     return () => {
+        clearIdleTimers();
         stopSpeaking();
         isSpeaking = false;
     };

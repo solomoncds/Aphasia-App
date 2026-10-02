@@ -47,7 +47,7 @@ export async function render(container) {
         if (needsRec) {
             children.push(createElement('span', {
                 style: { fontSize: '11px', color: 'var(--accent-rose)', marginTop: '4px' }
-            }, '🔴 Tap to record'));
+            }, '🔴 Record'));
         }
 
         const el = createElement('button', {
@@ -136,7 +136,7 @@ export async function render(container) {
         const modal = createElement('div', { className: 'modal' }, [
             createElement('h3', { className: 'modal__title' }, 'Record Pronunciation'),
             createElement('p', { className: 'modal__body' },
-                `Record how to say "${card.text}". A family member should speak this clearly.`),
+                `Say "${card.text}" clearly. Tap Stop when done.`),
             createElement('div', { className: 'flex-col gap-3 mt-4' }, [
                 recBtn, status, playBtn, saveBtn, cancelBtn
             ]),

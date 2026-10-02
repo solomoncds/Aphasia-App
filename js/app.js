@@ -295,13 +295,13 @@ async function renderHome(container) {
     const sectionTitle = createElement('h2', { className: 'home__section-title' }, 'Practice Categories');
 
     const cats = [
-        { route: 'words-select',      icon: '🗣️', bg: 'var(--color-card-light)',   title: 'Words',            sub: `${mastered} mastered · Practice by syllables or topic` },
-        { route: 'sequences',         icon: '🔢', bg: 'var(--color-card-light)',   title: 'Sequences',        sub: 'Days, months, alphabet & prayer' },
-        { route: 'pronunciation',     icon: '🔊', bg: 'var(--color-card-light)',   title: 'Pronunciation',    sub: 'Listen and repeat drills' },
-        { route: 'sentence-builder',  icon: '🧩', bg: 'var(--color-card-light)',   title: 'Sentences',        sub: 'Build sentences from words' },
-        { route: 'verbs-pronouns',    icon: '🏃', bg: 'var(--color-card-light)',   title: 'Verbs & Pronouns', sub: 'Action words and subjects' },
+        { route: 'words-select',      icon: '🗣️', bg: 'var(--color-card-light)',   title: 'Words',            sub: `${mastered} mastered` },
+        { route: 'sequences',         icon: '🔢', bg: 'var(--color-card-light)',   title: 'Sequences',        sub: 'Days, months, alphabet' },
+        { route: 'pronunciation',     icon: '🔊', bg: 'var(--color-card-light)',   title: 'Pronunciation',    sub: 'Listen & repeat' },
+        { route: 'sentence-builder',  icon: '🧩', bg: 'var(--color-card-light)',   title: 'Sentences',        sub: 'Build sentences' },
+        { route: 'verbs-pronouns',    icon: '🏃', bg: 'var(--color-card-light)',   title: 'Verbs & Pronouns', sub: 'Action words & subjects' },
         { route: 'conversation',      icon: '💬', bg: 'var(--color-card-light)',   title: 'Conversation',     sub: 'Open-ended practice' },
-        { route: 'session-setup',     icon: '⚙️', bg: 'var(--color-card-light)',   title: 'Custom Session',   sub: 'Choose specific exercise categories' },
+        { route: 'session-setup',     icon: '⚙️', bg: 'var(--color-card-light)',   title: 'Custom Session',   sub: 'Pick focus areas' },
     ];
 
     const catGrid = createElement('div', { className: 'home__categories' });

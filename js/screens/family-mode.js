@@ -81,7 +81,7 @@ export async function render(container) {
             el.appendChild(createElement('div', { className: 'empty-state' }, [
                 createElement('div', { className: 'empty-state__icon' }, '👤'),
                 createElement('p', { className: 'empty-state__text' },
-                    'Add family members to personalize exercises with real photos.'),
+                    'Add people to personalize exercises.'),
             ]));
             return;
         }
@@ -116,7 +116,7 @@ export async function render(container) {
             el.appendChild(createElement('div', { className: 'empty-state' }, [
                 createElement('div', { className: 'empty-state__icon' }, '📍'),
                 createElement('p', { className: 'empty-state__text' },
-                    'Add meaningful places to use in exercises.'),
+                    'Add places to use in exercises.'),
             ]));
             return;
         }
@@ -151,7 +151,7 @@ export async function render(container) {
             el.appendChild(createElement('div', { className: 'empty-state' }, [
                 createElement('div', { className: 'empty-state__icon' }, '📝'),
                 createElement('p', { className: 'empty-state__text' },
-                    'Add custom words with photos and optional recorded pronunciations.'),
+                    'Add words with photos or recordings.'),
             ]));
             return;
         }
@@ -200,7 +200,7 @@ export async function render(container) {
         if (type === 'people') {
             relInput = createElement('input', {
                 className: 'form-input',
-                placeholder: 'Relationship (e.g. Mother, Brother)',
+                placeholder: 'Relationship',
             });
         }
 
@@ -233,7 +233,7 @@ export async function render(container) {
         const photoBtn = createElement('button', {
             className: 'btn btn--secondary',
             onClick: () => fileInput.click(),
-        }, '📷  Add Photo');
+        }, '📷 Photo');
 
         // Audio recording (vocab only)
         let audioBlob = null;
@@ -244,7 +244,7 @@ export async function render(container) {
 
             const recBtn = createElement('button', {
                 className: 'btn btn--secondary',
-            }, '🎤  Record Pronunciation');
+            }, '🎤 Record');
 
             const recStatus = createElement('span', { className: 'text-sm text-secondary' });
 
@@ -266,7 +266,7 @@ export async function render(container) {
         // Save
         const saveBtn = createElement('button', {
             className: 'btn btn--primary w-full',
-        }, '💾  Save');
+        }, 'Save');
 
         saveBtn.addEventListener('click', async () => {
             const name = nameInput.value.trim();

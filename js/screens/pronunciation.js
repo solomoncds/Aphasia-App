@@ -164,36 +164,26 @@ export async function render(container) {
         const footer = document.getElementById('pn-footer');
         footer.innerHTML = '';
 
-        const label = createElement('p', {
-            className: 'text-center text-sm text-secondary mb-3',
-        }, 'How did it go?');
-
         const group = createElement('div', { className: 'self-report' });
 
-        const btns = [
-            { report: 'independent', cls: 'self-report__btn--success', icon: '✓', label: 'I said it' },
-            { report: 'cue',         cls: 'self-report__btn--help',    icon: '↻', label: 'Needed help' },
-            { report: 'unable',      cls: 'self-report__btn--unable',  icon: '→', label: "Couldn't say it" },
-        ];
+        const gotItBtn = createElement('button', {
+            className: 'self-report__btn self-report__btn--got-it',
+        }, [
+            createElement('span', { className: 'self-report__icon' }, '✓'),
+            createElement('span', {}, 'Got it'),
+        ]);
+        gotItBtn.addEventListener('click', () => handleReport('independent'));
 
-        for (const b of btns) {
-            const btn = createElement('button', {
-                className: `self-report__btn ${b.cls}`,
-            }, [
-                createElement('span', { className: 'self-report__icon' }, b.icon),
-                createElement('span', {}, b.label),
-            ]);
-            btn.addEventListener('click', () => handleReport(b.report));
-            group.appendChild(btn);
-        }
+        const didntBtn = createElement('button', {
+            className: 'self-report__btn self-report__btn--didnt-get-it',
+        }, [
+            createElement('span', { className: 'self-report__icon' }, '✗'),
+            createElement('span', {}, "Didn't get it"),
+        ]);
+        didntBtn.addEventListener('click', () => handleReport('unable'));
 
-        const skipBtn = createElement('button', {
-            className: 'btn btn--ghost w-full mt-3',
-            style: { color: 'var(--text-secondary)' },
-            onClick: () => goNext('skipped'),
-        }, currentIdx < items.length - 1 ? 'Next Word →' : 'Finish ✓');
-
-        footer.append(label, group, skipBtn);
+        group.append(gotItBtn, didntBtn);
+        footer.appendChild(group);
     }
 
     async function handleReport(report) {
